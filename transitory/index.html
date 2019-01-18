@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Transitory</title>
+    <meta charset="UTF-8">
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+
+</head>
+
+
+<body class="container">
+
+    <h1>Selemat datang di Transitory.</h1>
+    <h2>Masuk ke mode tampilan seluler.</h2>
+    <p><strong>Windows keyboard:</strong><br>1. Ctrl+Shift+C<br>2.Ctrl+Shift+M</p>
+    <p><strong>Mac keyboard:</strong><br>1. Command+Option+C</br>2. Command+Shift+M</p>
+
+    <h2>Penelusuran</h2>
+    <form id="searchForm">
+        <div class="form-group">
+            <input id="query" type="text" class="form-control" placeholder="Ketikkan pencarian di sini">
+        </div>
+        <button type="submit" class="btn btn-primary">Penelusuran</button>
+    </form>
+
+    <br>
+
+    <h2>Contohnya</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><a href="https://www.google.com/search?gl=id&hl=id&q=efek+lautan+pemanasan+global">efek lautan pemanasan global</a></li>
+        <li class="list-group-item"><a href="https://www.google.com/search?gl=id&hl=id&q=makanan+apatosaurus">makanan apatosaurus</a></li>
+    </ul>
+
+
+
+<script>
+    document.getElementById('searchForm').addEventListener("submit", function(event) {
+        event.preventDefault();
+        window.location.href = 'https://www.google.com/search?gl=id&hl=id&q=' +
+                encodeURIComponent(document.getElementById("query").value);
+    });
+</script>
+</body>
+</html>
