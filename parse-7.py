@@ -8,6 +8,8 @@
 
 import urllib.parse as ul
 import json
+import sys
+import csv
 
 countries = {
 'LAT': 'Latvia',
@@ -265,9 +267,12 @@ countries = {
 country_projects = ['WikiProject ' + v for v in list(set(countries.values()))]
 
 
-f = open('outmid.newregex', 'r')
+f = open('outmid.newregex.20191028.heading_adjusted_for_20191002_science_reconfiguration_mismatch_with_main_directory', 'r')
 wikiprojects = json.loads(f.read())
 f.close()
+
+fout = open('topic_predictions.tsv', 'w')
+tsvwriter = csv.writer(fout, delimiter='\t')
 
 #for w in wikiprojects['wikiprojects']:
 #	print(w)
@@ -295,26 +300,44 @@ print(
 #print("<p>Key:</p><h1><u>UGC's wikiproject with 'highest rating'  agreed with a top-3 drafttopic prediction</u><h1><h1>UGC's first listed wikiproject agreed with a top-3 drafttopic prediction</h1><h2><u>UGC's wikiproject with 'highest rating' not found in drafttopic, but found in mid-level categories anyway</u></h2><h2>UGCs' first listed wikiproject not found in drafttopic, but found in mid-level categories anyway</h2><h3>A drafttopic result looked okay enough</h3><p>(Unstyled) We exhausted our options and we're taking just the most highly rated drafttopic prediction</p>")
 rows = 0;
 
-with open('sample10000.tsv') as tsv:
+with open('topic_enwiki_revisions_201909_mediawiki_page_dump_enriched_20191025_through_20191028.tsv') as tsv:
+#with open('sample10000.tsv') as tsv:
+
+	reader = csv.reader(tsv, delimiter='\t', quotechar='"')
 	for line in tsv:
 		parts = line.split("\t")
-		title = parts[2]
+		try:
+			page_id, title, rev_id = parts[1:4]
+		except Exception:
+			sys.stderr.write("unpacking issue with title assignment at " + line)
+			continue
 		#print("<tr><td><a href='https://en.wikipedia.org/wiki/" + ul.quote(title) + "' data-wiki-lang='en' data-wiki-title='" + ul.quote(title) + "'>" + title.replace("_", " ") + "</a> (<a href='https://en.wikipedia.org/wiki/Talk:" + ul.quote(title) + "'>T</a>)</td>")
 
-		print("<tr><td><a target='_blank' href='https://en.wikipedia.org/wiki/" + ul.quote(title) + "' data-wiki-lang='en' data-wiki-title='" + ul.quote(title) + "'>" + title.replace("_", " ") + "</a> (<a target='_blank' href='https://en.wikipedia.org/wiki/Talk:" + ul.quote(title) + "'>Talk</a>)<br /><br /><br /></td>")
+		if rows < 10002:
+			print("<tr><td><a target='_blank' href='https://en.wikipedia.org/wiki/" + ul.quote(title) + "' data-wiki-lang='en' data-wiki-title='" + ul.quote(title) + "'>" + title.replace("_", " ") + "</a> (<a target='_blank' href='https://en.wikipedia.org/wiki/Talk:" + ul.quote(title) + "'>Talk</a>)<br /><br /><br /></td>")
 		
-		predicted, is_human, has_geo, has_list, country_association = ['predicted'] + parts[7:9] + ['has_list'] + ['country_association']
-		topic, topic_rating, topic_first_encountered, topic_first_encountered_rating, best1, best1_score, best2, best2_score, best3, best3_score, title_y, page_id_ns_0, infobox_name, country, division_granularity, country_direct  = parts[11:]
+		try:
+
+			predicted, is_human, has_geo, has_list, country_association = ['predicted'] + parts[6:8] + ['has_list'] + ['country_association']
+			topic, topic_rating, topic_first_encountered, topic_first_encountered_rating, best1, best1_score, best2, best2_score, best3, best3_score, best4, best4_score, best5, best5_score, title_y, page_id_ns_0, infobox_name, country, division_granularity, country_direct  = parts[10:]
+			#sys.stderr.write("title " + title + " topic " + topic)
+		except Exception:
+			sys.stderr.write("unpacking issue with " + line)
+			continue
 
 		topic = topic.replace('WikiProject Elections and Referendums', 'WikiProject Elections and Referenda')
 		topic_first_encountered = topic_first_encountered.replace('WikiProject Elections and Referendums', 'WikiProject Elections and Referenda')
 
+		#if not parts[4] and not topic:
+		#	sys.stderr.write("problem with " + line)
+		#	continue
+		#if not best1:
+		#	sys.stderr.write("no drafttopic data for " + line)
+		#	continue
 
+#	page_id	page_title_x	rev_id	page_title_y	page_latest	is_human	has_geo	title_x	page_id_ns_1	topic	topic_rating	topic_first_encountered	topic_first_encountered_rating	best1	best1_score	best2	best2_score	best3	best3_score	best4	best4_score	best5	best5_score	title_y	page_id_ns_0	infobox_name	country	division_granularity	country_direct
+#1659345	11750404	Edward_Day	803132061	Edward_Day	803132061.0			Edward_Day	23751301	WikiProject Disambiguation	unknown_importance	WikiProject Disambiguation	unknown_importance	Culture.Language and literature	0.8264995569857055	Geography.Countries	0.4318927707846621	Assistance.Maintenance	0.22540381260920309	STEM.Time	0.10877263160177789	History_And_Society.History and society	0.09000168637904864	
 
-
-
-#	page_id	page_title_x	rev_id	pageviews	page_title_y	page_latest	is_human	has_geo	title_x	page_id_ns_1	topic	topic_rating	topic_first_encountered	topic_first_encountered_rating	best1	best1_score	best2	best2_score	best3	best3_score	title_y	page_id_ns_0	infobox_name	country	division_granularity	country_direct
-#1560071	50348800.0	List_of_Stop!!_Hibari-kun!_episodes	881813158.0	126	List_of_Stop!!_Hibari-kun!_episodes	881813158.0			List_of_Stop!!_Hibari-kun!_episodes	50348805	WikiProject Anime and manga	low	WikiProject Lists	unknown_importance	Culture.Entertainment	0.645384686292839	Culture.Broadcasting	0.5083503476220342	Culture.Visual arts	0.4170614440031028
 
 
 
@@ -332,10 +355,10 @@ with open('sample10000.tsv') as tsv:
 				has_list = ''
 
 			country = country.strip()
-			if country.startswith('UNKNOWN'):
+			if country.startswith('UNKNOWN') or country.startswith('nan'):
 				country = ''
 			country_direct = country_direct.strip()
-			if country_direct.startswith('UNKNOWN'):
+			if country_direct.startswith('UNKNOWN') or country_direct.startswith('nan'):
 				country_direct = ''
 			if country or country_direct:
 				country_association = country if country else country_direct
@@ -345,7 +368,7 @@ with open('sample10000.tsv') as tsv:
 			else:
 				country_association = ''
 
-			if predicted == 'predicted':
+			if predicted == 'predicted' and best1: #checking best1 in case no drafttopic data
 				for b in [best1, best2, best3]:
 					if 'Wikipedia:' + topic in wikiprojects['wikiprojects'][b]:
 						if topic == 'WikiProject Lists' or (has_list and b == 'Culture.Language and literature'):
@@ -361,7 +384,7 @@ with open('sample10000.tsv') as tsv:
 						predicted = b
 						break
 
-			if predicted == 'predicted':
+			if predicted == 'predicted' and best1: # checking best1 in case no drafttopic data
 				for b in [best1, best2, best3]:
 					if 'Wikipedia:' + topic_first_encountered in wikiprojects['wikiprojects'][b]:
 						if topic_first_encountered  == 'WikiProject Lists' or (has_list and b == 'Culture.Language and literature'):
@@ -421,7 +444,7 @@ with open('sample10000.tsv') as tsv:
 						break
 
 
-			if predicted == 'predicted':
+			if predicted == 'predicted' and best1: # checking best1 in case no drafttopic data
 				for b, b_score in [(best1, best1_score), (best2, best2_score), (best3, best3_score)]:
 					score = float(b_score)
 
@@ -453,7 +476,7 @@ with open('sample10000.tsv') as tsv:
 			# TODO: resolve Women Scientists. Notice how Karen Wynn shows up under Culture.Language and literature because of WikiProject Women Scientists moniker.
 
 
-			if predicted == 'predicted':
+			if predicted == 'predicted' and best1: # checking best1 in case no drafttopic data
 				for b in [best1, best2, best3]:
 					if b.startswith('Assistance'):
 						continue
@@ -461,19 +484,19 @@ with open('sample10000.tsv') as tsv:
 						predicted = country_association
 						break
 					elif ('WikiProject Biography' in [topic, topic_first_encountered] or is_human) and (country_association or (b.startswith('Geography') and b not in ['Geography.Bodies of water', 'Geography.Landforms', 'Geography.Maps'])):
-						predicted = 'Regional society (best guess)'
+						predicted = 'Regional society' # best guess
 						break
-			if predicted == 'predicted':
+			if predicted == 'predicted' and best1: # checking best1 in case no drafttopic data
 				for b in [best1, best2, best3]:
 					if b.startswith('Assistance'):
 						continue
 					elif b.startswith('Geography') and b not in ['Geography.Bodies of water', 'Geography.Landforms', 'Geography.Maps']:
-						predicted = 'Regional geography (best guess)'
+						predicted = 'Regional geography' # best guess
 						break
 					elif country_association:
-						predicted = 'Regional interest (best guess)'
+						predicted = 'Regional interest' # best guess
 					else:
-						predicted = b + ' (best guess)'
+						predicted = b # best guess
 						break
 
 		bold_it = False
@@ -486,11 +509,18 @@ with open('sample10000.tsv') as tsv:
 		predicted = predicted.replace("Plastic arts", "Structures of note")
 
 		if bold_it:
-			predicted = '<div style="font-weight:bold; color:orange">' + predicted + '</div>'
+			predicted_formatted = '<div style="font-weight:bold; color:orange">' + predicted + '</div>'
+		else:
+			predicted_formatted = predicted
 
-		for p in [predicted, is_human, has_geo, has_list, country_association, topic, topic_first_encountered, best1, best1_score]:
-			print("<td>" + p + "</td>")
-		
-		print("</tr>")
+		the_rest = [page_id, rev_id, predicted, is_human, has_geo, has_list, country_association, topic, topic_first_encountered, best1, best1_score, best2, best2_score, best3, best3_score, best4, best4_score, best5, best5_score]
+
+		if rows < 10002:
+			for p in [page_id, rev_id, predicted_formatted, is_human, has_geo, has_list, country_association, topic, topic_first_encountered, best1, best1_score, best2, best2_score, best3, best3_score, best4, best4_score, best5, best5_score]:
+				print("<td>" + p + "</td>")
+			print("</tr>")
+
+		tsvwriter.writerow([title] + the_rest)
 		rows += 1
+fout.close()
 print("</table></body></html>")
